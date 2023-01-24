@@ -15,34 +15,34 @@ limiter = Limiter(
 )
 
 
-# Lee los parámetros de URL y redirige a Streamlink.
+# Reads the URL parameters and redirects to Streamlink.
 def query_handler(args):
-    """Comprueba y prueba los argumentos antes de atender la solicitud"""
+    """Checks and tests arguments before serving request"""
     if not args.get("streaming-ip"):
-        return "No diste ninguna URL."
+        return "You didn't give any URL."
 
-    # para dacast, tenga en cuenta que tenemos MÚLTIPLES parámetros. Consíguelo si existe
+    # for dacast, be warned we have MULTIPLE parameters. Get it if exists
     if args.get("provider"):
         valid = validators.url(args.get("streaming-ip"))
         url = args.get("streaming-ip") + "&provider=" + args.get('provider')
-        return get_streams(url) if valid else "La URL que has introducido no es válida."
+        return get_streams(url) if valid else "The URL you've entered is not valid."
     else:
         valid = validators.url(args.get("streaming-ip"))
-        return get_streams(args.get("streaming-ip")) if valid else "La URL que has introducido no es válida."
+        return get_streams(args.get("streaming-ip")) if valid else "The URL you've entered is not valid."
 
 
-# Pagina de presentación
+# Presentation page
 @app.route("/", methods=['GET'])
 def index():
-    return "Este programa le permite obtener acceso directo a las transmisiones usando Streamlink.\r\nSi tiene un enlace que " \
-           "necesita ser tratado, desde esta página web, agregue /iptv-query?streaming-ip= *su URL*.\r\nTenga en cuenta que" \
+    return "This program permits you to get direct access to streams by using Streamlink.\r\nIf you have a link that " \
+           "needs to be treated, from this webpage, add /iptv-query?streaming-ip= *your URL*.\r\nNote that it will " \
            "work " \
            "only on Streamlink-supported websites.\r\nEnjoy ! LaneSh4d0w. Special thanks to Keystroke for the API " \
            "usage. "
 
 
-# iptv-query route -> proporciona un enlace a Streamlink, se analiza el enlace
-# para el enrutamiento correcto del complemento y redirige (o muestra) al enlace de transmisión.
+# iptv-query route -> gives link to Streamlink, link is analyzed
+# for correct plugin routing, and redirects (or shows) to the stream link.
 @app.route("/iptv-query", methods=['GET'])
 @limiter.limit("20/minute")
 @limiter.limit("1/second")
@@ -55,12 +55,12 @@ def home():
     return response if request.args.get("noredirect") == "yes" else redirect(response)
 
 
-# Sistema de limitación de velocidad.
+# Rate limiting system.
 @app.errorhandler(429)
 def ratelimit_handler(e):
     return f'{e}. To ensure everyone gets a correct access to the program, we are rate-limiting the server.'
 
 
-# cambie a su gusto, los parámetros son "ip", "port", "threaded"
+# change to your likings, params are "ip", "port", "threaded"
 if __name__ == '__main__':
     app.run(threaded=False, port=5000)
